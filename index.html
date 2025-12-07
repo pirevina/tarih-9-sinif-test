@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boğaziçi Koleji 9. Sınıf Tarih - Geçmişin İnşa Süreci</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #e67e22;
+            --light: #ecf0f1;
+            --success: #27ae60;
+            --error: #c0392b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f7;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        /* Soru Numaraları Paneli */
+        .nav-panel {
+            background: white;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            border-bottom: 2px solid #ddd;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .nav-btn {
+            width: 35px;
+            height: 35px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            font-weight: bold;
+            border-width: 2px;
+        }
+
+        .nav-btn.answered {
+            background-color: var(--light);
+            color: var(--secondary);
+        }
+
+        /* Ana İçerik */
+        .container {
+            flex: 1;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 90%;
+        }
+
+        .question-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9f9f9;
+        }
+
+        .option-label input {
+            margin-right: 15px;
+        }
+
+        /* Kontrol Butonları */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button.control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: white;
+            transition: opacity 0.2s;
+        }
+
+        button.control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-prev { background-color: var(--secondary); }
+        .btn-next { background-color: var(--primary); }
+        .btn-finish { background-color: var(--accent); }
+
+        /* Sonuç Ekranı */
+        .result-container {
+            display: none;
+        }
+
+        .score-card {
+            text-align: center;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .score-card h2 { color: var(--accent); }
+
+        .review-item {
+            border-bottom: 1px solid #eee;
+            padding: 20px 0;
+        }
+
+        .review-q { font-weight: bold; margin-bottom: 10px; }
+        .review-ans { margin-bottom: 5px; }
+        .correct { color: var(--success); font-weight: bold; }
+        .incorrect { color: var(--error); font-weight: bold; text-decoration: line-through; }
+        .explanation { 
+            background-color: #fff3cd; 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin-top: 10px; 
+            font-size: 0.9rem;
+        }
+
+        footer {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            margin-top: auto;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Boğaziçi Koleji 9. Sınıf Tarih: Geçmişin İnşa Sürecinde Tarih</h1>
+</header>
+
+<div class="nav-panel" id="navPanel">
+    </div>
+
+<div class="container" id="quizContainer">
+    <div class="question-header">
+        <span id="qIndex">Soru 1/50</span>
+        <span style="float: right; color: #7f8c8d; font-size: 0.9rem;" id="qDifficulty">Kolay</span>
+    </div>
+    <div class="question-text" id="qText"></div>
+    <div class="options" id="qOptions"></div>
+
+    <div class="controls">
+        <button class="control-btn btn-prev" id="prevBtn" onclick="prevQuestion()">Önceki Soru</button>
+        <button class="control-btn btn-next" id="nextBtn" onclick="nextQuestion()">Sonraki Soru</button>
+        <button class="control-btn btn-finish" id="finishBtn" onclick="finishQuiz()" style="display: none;">Testi Bitir</button>
+    </div>
+</div>
+
+<div class="container result-container" id="resultContainer">
+    <div class="score-card">
+        <h2>Test Tamamlandı!</h2>
+        <p id="scoreText"></p>
+        <button class="control-btn btn-next" onclick="location.reload()">Tekrar Çöz</button>
+    </div>
+    <div id="reviewArea"></div>
+</div>
+
+<footer>
+    Hazırlayan: Murat Mutlu, Tarih Öğretmeni
+</footer>
+
+<script>
+    // 50 Soruluk Veri Seti
+    const questions = [
+        // KOLAY SEVİYE
+        {
+            text: "Geçmişte yaşamış insan topluluklarının faaliyetlerini, yer ve zaman göstererek, sebep-sonuç ilişkisi içinde, belgelere dayanarak objektif biçimde inceleyen sosyal bilim dalıdır. Yukarıdaki tanımda tarih biliminin hangi özelliğine değinilmemiştir?",
+            options: ["Belgelere dayanması", "Deney ve gözlem metodu kullanması", "Yer ve zaman belirtmesi", "Sebep-sonuç ilişkisi kurması", "Objektif (nesnel) olması"],
+            correct: 1,
+            level: "Kolay",
+            explanation: "Tarihte deney ve gözlem yapılamaz çünkü olaylar geçmişte kalmıştır ve tekrarlanamaz."
+        },
+        {
+            text: "Tarih araştırmalarında deney ve gözlem metodunun kullanılamamasının temel sebebi aşağıdakilerden hangisidir?",
+            options: ["Olayların üzerinden uzun zaman geçmesi", "Tarihi olayların tekrarlanamaz olması", "Belgelerin yetersiz olması", "Tarihçilerin taraflı olması", "Teknolojinin yetersiz kalması"],
+            correct: 1,
+            level: "Kolay",
+            explanation: "Tarihi olaylar özgündür ve bir kez yaşanır (Örn: Malazgirt Savaşı tekrar yapılamaz), bu yüzden deney yapılamaz."
+        },
+        {
+            text: "Aşağıdakilerden hangisi tarihi bir olayın aydınlatılmasında kullanılan 'birinci elden kaynak' (ana kaynak) grubuna girer?",
+            options: ["Olayla ilgili sonradan yazılan bir makale", "Ders kitabı", "Olayın geçtiği döneme ait bir ferman", "Tarihi bir roman", "Ansiklopedi"],
+            correct: 2,
+            level: "Kolay",
+            explanation: "Ferman, olayın geçtiği anda yazıldığı için 1. elden kaynaktır. Diğerleri sonradan yazılmıştır."
+        },
+        {
+            text: "Tarih biliminin yöntem aşamalarından ilki hangisidir?",
+            options: ["Tahlil (Çözümleme)", "Tasnif (Sınıflandırma)", "Terkip (Sentez)", "Tarama (Kaynak Arama)", "Tenkit (Eleştiri)"],
+            correct: 3,
+            level: "Kolay",
+            explanation: "Araştırmanın ilk aşaması konuyla ilgili kaynakların taranmasıdır (Tarama)."
+        },
+        {
+            text: "Kazı yaparak toprak veya su altındaki maddi kalıntıları ortaya çıkaran ve tarih öncesi dönemlerin aydınlatılmasında tarihe en çok yardımcı olan bilim dalı hangisidir?",
+            options: ["Paleografya", "Nümizmatik", "Arkeoloji", "Epigrafya", "Diplomasi"],
+            correct: 2,
+            level: "Kolay",
+            explanation: "Özellikle yazı öncesi dönem için en önemli bilim kazı bilimi olan arkeolojidir."
+        },
+        {
+            text: "Tarihi olayların zamanının belirlenmesinde ve sıralanmasında tarihe yardımcı olan bilim dalı hangisidir?",
+            options: ["Coğrafya", "Kronoloji", "Sosyoloji", "Filoloji", "Hukuk"],
+            correct: 1,
+            level: "Kolay",
+            explanation: "Kronoloji zaman bilimidir ve olayları oluş sırasına göre dizer."
+        },
+        {
+            text: "Aşağıdakilerden hangisi 'Tarihi Olay'a örnektir?",
+            options: ["Anadolu'nun Türkleşmesi", "Malazgirt Savaşı", "İslamiyet'in yayılması", "Sanayileşme", "Feodalitenin yıkılması"],
+            correct: 1,
+            level: "Kolay",
+            explanation: "Malazgirt Savaşı somut, başlangıcı ve bitişi belli kısa süreli bir 'Olay'dır. Diğer şıklar uzun süreli 'Olgu'dur."
+        },
+        {
+            text: "Eski paraları inceleyerek devletlerin ekonomik durumu ve hükümdar isimleri hakkında bilgi veren bilim dalı hangisidir?",
+            options: ["Nümizmatik", "Epigrafya", "Heraldik", "Etnografya", "Antropoloji"],
+            correct: 0,
+            level: "Kolay",
+            explanation: "Nümizmatik (Meskukat) para bilimidir."
+        },
+        {
+            text: "'Orta Asya Türk Tarihi' şeklindeki bir sınıflandırma, tarihin hangi tür tasnifine (sınıflandırmasına) örnektir?",
+            options: ["Zamana göre", "Mekâna göre", "Konuya göre", "Yönteme göre", "Kaynağa göre"],
+            correct: 1,
+            level: "Kolay",
+            explanation: "'Orta Asya' coğrafi bir yer (mekân) belirttiği için mekâna göre tasniftir."
+        },
+        {
+            text: "Türklerin tarih boyunca kullandığı takvimlerden hangisi 'Ay Yılı' esaslıdır?",
+            options: ["12 Hayvanlı Türk Takvimi", "Celali Takvim", "Rumi Takvim", "Hicri Takvim", "Miladi Takvim"],
+            correct: 3,
+            level: "Kolay",
+            explanation: "Türklerin kullandığı takvimlerden sadece Hicri Takvim 'Ay Yılı' esaslıdır, diğerleri Güneş yılıdır."
+        },
+        {
+            text: "Anıtlar üzerindeki kitabeleri ve yazıtları inceleyen bilim dalı hangisidir?",
+            options: ["Paleografya", "Epigrafya", "Filoloji", "Diplomasi", "Kimya"],
+            correct: 1,
+            level: "Kolay",
+            explanation: "Epigrafya kitabeleri inceler (Örn: Orhun Abideleri)."
+        },
+        {
+            text: "Aşağıdakilerden hangisi tarihin 'Zamana Göre Tasnif'ine bir örnektir?",
+            options: ["Tıp Tarihi", "Avrupa Tarihi", "Osmanlı Tarihi", "Orta Çağ Tarihi", "Dinler Tarihi"],
+            correct: 3,
+            level: "Kolay",
+            explanation: "'Orta Çağ' belirli bir zaman dilimidir."
+        },
+        {
+            text: "Eski yazıların okunmasını sağlayan, alfabeleri inceleyen bilim dalı hangisidir?",
+            options: ["Paleografya", "Arkeoloji", "Nümizmatik", "Heraldik", "İstatistik"],
+            correct: 0,
+            level: "Kolay",
+            explanation: "Paleografya eski alfabeleri okur ve inceler."
+        },
+        {
+            text: "Aşağıdakilerden hangisi Türklerin kullandığı Güneş yılı esaslı takvimlerden biri değildir?",
+            options: ["12 Hayvanlı Türk Takvimi", "Hicri Takvim", "Celali Takvim", "Rumi Takvim", "Miladi Takvim"],
+            correct: 1,
+            level: "Kolay",
+            explanation: "Hicri Takvim Ay yılıdır, diğer şıkların hepsi Güneş yılıdır."
+        },
+        {
+            text: "Tarih biliminin en son aşaması olup, elde edilen bilgilerin birleştirilerek eserin oluşturulduğu aşama hangisidir?",
+            options: ["Tarama", "Tasnif", "Tahlil", "Tenkit", "Terkip"],
+            correct: 4,
+            level: "Kolay",
+            explanation: "Terkip (Sentez) bilgilerin birleştirilip kitabın yazıldığı son aşamadır."
+        },
+        {
+            text: "Miladi Takvim hangi uygarlığın güneş yılı çalışmalarına dayanarak geliştirilmiştir?",
+            options: ["Sümer", "Mısır", "Çin", "Hint", "Hitit"],
+            correct: 1,
+            level: "Kolay",
+            explanation: "Miladi takvimin temeli Mısır'a dayanır (Daha sonra Roma geliştirmiştir)."
+        },
+        {
+            text: "Aşağıdakilerden hangisi 'Sözlü Kaynak'lara örnektir?",
+            options: ["Gazete", "Para", "Destan", "Kil tablet", "Heykel"],
+            correct: 2,
+            level: "Kolay",
+            explanation: "Destanlar, efsaneler ve menkıbeler sözlü kaynaklardır."
+        },
+        {
+            text: "Tarihçinin kaynakların doğruluğunu ve güvenilirliğini sorguladığı aşama hangisidir?",
+            options: ["Tarama", "Tasnif", "Tahlil", "Tenkit", "Terkip"],
+            correct: 3,
+            level: "Kolay",
+            explanation: "Tenkit (Eleştiri) aşamasında bilginin doğruluğu ve güvenilirliği sorgulanır."
+        },
+        {
+            text: "Coğrafya bilimi tarihe en çok hangi konuda yardımcı olur?",
+            options: ["Olayların geçtiği yerin ve iklimin etkisini belirtmede", "Olayların zamanını sıralamada", "Eski yazıları okumada", "Irkları incelemede", "Dilleri incelemede"],
+            correct: 0,
+            level: "Kolay",
+            explanation: "Coğrafya, olayın geçtiği yerin şartlarını (iklim, yeryüzü şekilleri) inceleyerek olaya etkisini saptar."
+        },
+        {
+            text: "Tarihte 'Olgu' kavramı neyi ifade eder?",
+            options: ["Kısa süreli gelişmeleri", "Başlangıcı ve bitişi belli olan olayları", "Zamanla meydana gelen uzun süreli değişimleri", "Sadece siyasi olayları", "Savaşları ve antlaşmaları"],
+            correct: 2,
+            level: "Kolay",
+            explanation: "Olgu; olayların sonucunda uzun sürede meydana gelen genel değişimdir (Örn: Anadolu'nun Türkleşmesi)."
+        },
+        
+        // ORTA SEVİYE
+        {
+            text: "Tarih araştırmalarında kaynakların sınıflandırılmasının (Tasnif) temel amacı nedir?",
+            options: ["Kaynakları korumak", "Araştırmayı ve incelemeyi kolaylaştırmak", "Kaynak sayısını artırmak", "Tarihi olayları değiştirmek", "Eski eserleri sergilemek"],
+            correct: 1,
+            level: "Orta",
+            explanation: "Tasnif, karmaşık bilgi yığınını düzenleyerek araştırmayı kolaylaştırmak ve zaman kazanmak için yapılır."
+        },
+        {
+            text: "Bir tarihçi, Fatih Sultan Mehmet dönemi ile ilgili bir araştırma yaparken o dönemde basılmış paraları ve yazılmış fermanları inceliyorsa, sırasıyla hangi yardımcı bilimlerden faydalanmaktadır?",
+            options: ["Nümizmatik - Diplomasi", "Arkeoloji - Epigrafya", "Paleografya - Heraldik", "Etnografya - Kronoloji", "Nümizmatik - Arkeoloji"],
+            correct: 0,
+            level: "Orta",
+            explanation: "Para = Nümizmatik, Ferman (Resmi Belge) = Diplomasi."
+        },
+        {
+            text: "Tarihi bilgilerin kesin ve değişmez olmadığı, yeni belgeler bulundukça değişebileceği ilkesi dikkate alındığında, aşağıdakilerden hangisi söylenebilir?",
+            options: ["Tarih bilimi durağandır.", "Tarihi bilgiler mutlak doğrulardır.", "Tarih bilimi dinamik bir yapıya sahiptir.", "Eski kaynaklar her zaman yanlıştır.", "Tarihçiler olayları uydurur."],
+            correct: 2,
+            level: "Orta",
+            explanation: "Tarih durağan değildir, dinamiktir; yeni bir belge eski bilgiyi değiştirebilir."
+        },
+        {
+            text: "'Dış Tenkit' aşamasında bir eserle ilgili aşağıdaki sorulardan hangisinin cevabı aranır?",
+            options: ["Yazarın olaylara bakış açısı nedir?", "Eserdeki bilgiler diğer kaynaklarla uyuşuyor mu?", "Kitabın basıldığı kağıt ve mürekkep döneme uygun mu?", "Yazar doğru söylüyor mu?", "Metindeki bilgi eksiklikleri nelerdir?"],
+            correct: 2,
+            level: "Orta",
+            explanation: "Dış tenkit eserin 'dış' özelliklerine (kağıt, basım yılı, yazarın hayatı) bakar. İçeriğin doğruluğu iç tenkittedir."
+        },
+        {
+            text: "Malazgirt Savaşı bir 'Olay' ise, 'Anadolu'nun Türkleşmesi' bir 'Olgu'dur. Buna göre Olay ve Olgu arasındaki temel fark nedir?",
+            options: ["Olay soyut, olgu somuttur.", "Olay uzun süreli, olgu kısa sürelidir.", "Olay tekrarlanabilir, olgu tekrarlanamaz.", "Olay kendine özgüdür ve bir kez yaşanır; olgu ise süreç içinde gerçekleşen genel bir durumdur.", "Olaylar önemsiz, olgular önemlidir."],
+            correct: 3,
+            level: "Orta",
+            explanation: "Olay 'anlık/kısa', Olgu 'süreç/uzun'dur."
+        },
+        {
+            text: "Tarihçinin olayları değerlendirirken 'Objektif (Nesnel)' olabilmesi için aşağıdakilerden hangisinden kaçınması gerekir?",
+            options: ["Olayları kendi milli ve dini duygularına göre yorumlamaktan", "Belgeleri karşılaştırmaktan", "Neden-sonuç ilişkisine bakmaktan", "Olayın geçtiği zamanın şartlarını dikkate almaktan", "Farklı kaynaklardan yararlanmaktan"],
+            correct: 0,
+            level: "Orta",
+            explanation: "Objektif olmak için duygusal ve yanlı davranmaktan kaçınılmalıdır."
+        },
+        {
+            text: "Aşağıdaki eşleştirmelerden hangisi yanlıştır?",
+            options: ["Antropoloji - Irk Bilimi", "Filoloji - Dil Bilimi", "Etnografya - Kültür Bilimi", "Heraldik - Mühür Bilimi", "Kimya (Karbon 14) - Yaş Tayini"],
+            correct: 3,
+            level: "Orta",
+            explanation: "Yanlış. Heraldik 'Arma' bilimidir. Mühür bilimi 'Sicilografi'dir."
+        },
+        {
+            text: "Tarih öncesi çağlar (Yazının bulunmadığı dönemler) araştırılırken aşağıdaki bilim dallarından hangisinden yararlanılması beklenmez?",
+            options: ["Arkeoloji", "Antropoloji", "Paleografya", "Coğrafya", "Etnografya"],
+            correct: 2,
+            level: "Orta",
+            explanation: "Paleografya 'Yazı' bilimidir. Yazı öncesi (tarih öncesi) dönemde yazı olmadığı için kullanılamaz."
+        },
+        {
+            text: "Türklerin kullandığı takvimlerden hangisi hem Güneş yılı esaslıdır hem de Osmanlı Devleti'nde sadece mali işlerin düzenlenmesi amacıyla kullanılmıştır?",
+            options: ["Hicri Takvim", "Rumi Takvim", "Celali Takvim", "12 Hayvanlı Türk Takvimi", "Miladi Takvim"],
+            correct: 1,
+            level: "Orta",
+            explanation: "Rumi Takvim, Osmanlı'da mali işler için kullanılan Güneş yılı esaslı takvimdir."
+        },
+        {
+            text: "Bir tarih araştırmacısının 'Anakronizm' (Tarih Yanılgısı) yapması ne anlama gelir?",
+            options: ["Olayları kronolojik sıraya dizmesi", "Olayları ve nesneleri ait olmadıkları bir zaman diliminde düşünmesi veya anlatması", "Kaynakları çok iyi analiz etmesi", "Sadece yazılı kaynakları kullanması", "Yardımcı bilimlerden faydalanması"],
+            correct: 1,
+            level: "Orta",
+            explanation: "Anakronizm, tarihsel zaman hatası demektir (Örn: Fatih'in kol saati takması)."
+        },
+        {
+            text: "Tarih öğrenmenin bireye sağladığı faydalardan biri olan 'Empati' yeteneği, tarihsel bağlamda neyi ifade eder?",
+            options: ["Geçmişteki insanların acılarına üzülmeyi", "Geçmişteki olayları günümüzün değer yargılarıyla yargılamayı", "Kendini geçmişteki insanın yerine koyarak dönemin şartlarına göre düşünmeyi", "Tarihi olayları ezberlemeyi", "Geleceği tahmin etmeyi"],
+            correct: 2,
+            level: "Orta",
+            explanation: "Tarihsel empati, geçmişi bugünün kafasıyla değil, o günün şartlarıyla anlamaya çalışmaktır."
+        },
+        {
+            text: "'Tarih yazmak, tarih yapmak kadar mühimdir. Yazan yapana sadık kalmazsa değişmeyen hakikat, insanlığı şaşırtacak bir mahiyet alır.' sözüyle Mustafa Kemal Atatürk neyin önemini vurgulamıştır?",
+            options: ["Tarihi olayların çokluğunun", "Tarihçinin objektif (tarafsız) ve doğru bilgi aktarmasının", "Tarihin sadece zaferleri yazması gerektiğinin", "Tarihin sanatlı bir dille yazılmasının", "Tarihçilerin devlet adamı olması gerektiğinin"],
+            correct: 1,
+            level: "Orta",
+            explanation: "Atatürk burada tarihçinin dürüst ve gerçeğe sadık kalmasının, tarihi yapanlar kadar önemli olduğunu vurgular."
+        },
+        {
+            text: "Aşağıdakilerden hangisi 'İç Tenkit' (Metin Tenkidi) ile ilgili bir sorudur?",
+            options: ["Bu eser ne zaman basılmıştır?", "Eserin yazarı kimdir?", "Yazarın verdiği bilgiler gerçeğe ve akla uygun mudur?", "Kitabın cildi orijinal mi?", "Eser özgün bir nüsha mı yoksa kopya mı?"],
+            correct: 2,
+            level: "Orta",
+            explanation: "İç tenkit, metnin 'içindeki' bilginin doğruluğunu (akla uygun mu, doğru mu) sorgular."
+        },
+        {
+            text: "Bir antlaşma metninin orijinal olup olmadığını, yazı karakterini, kullanılan imza ve tuğraları inceleyen bilim dalı hangisidir?",
+            options: ["Diplomasi", "Nümizmatik", "Antropoloji", "Sosyoloji", "Arkeoloji"],
+            correct: 0,
+            level: "Orta",
+            explanation: "Diplomasi, resmi belgeleri şekil ve içerik bakımından inceler."
+        },
+        {
+            text: "Celali Takvim'in Büyük Selçuklu Sultanı Melikşah adına hazırlanmış olması, takvim çalışmaları ile aşağıdakilerden hangisi arasında ilişki olduğunu gösterir?",
+            options: ["Din", "Siyasi otorite ve ekonomi", "Askeri yapı", "Coğrafi keşifler", "Sanat anlayışı"],
+            correct: 1,
+            level: "Orta",
+            explanation: "Takvim yapmak astronomi bilgisinin yanı sıra, bunu finanse eden 'siyasi güç' ve tarım/vergi zamanını belirleme ihtiyacı (ekonomi) ile ilgilidir."
+        },
+        {
+            text: "Tarihi olayların incelenmesinde 'Yer' belirtilmesinin temel amacı nedir?",
+            options: ["Olayın geçtiği coğrafi ortamın olaya etkisini saptamak", "Harita çizebilmek", "Olayın ne zaman olduğunu bulmak", "Kahramanları tanımak", "Turizme katkı sağlamak"],
+            correct: 0,
+            level: "Orta",
+            explanation: "Yer belirtmek, olayın çevresel faktörlerden nasıl etkilendiğini anlamamızı sağlar."
+        },
+        {
+            text: "Aşağıdakilerden hangisi sözlü tarih çalışmalarına bir örnektir?",
+            options: ["Bir padişah fermanının okunması", "Kıbrıs Barış Harekatı'na katılmış bir gazi ile röportaj yapılması", "Bir antlaşma metninin çevrilmesi", "Müzedeki paraların incelenmesi", "Arşiv belgelerinin tasnif edilmesi"],
+            correct: 1,
+            level: "Orta",
+            explanation: "Olayı yaşayan biriyle konuşmak ve kaydetmek 'Sözlü Tarih'tir."
+        },
+        {
+            text: "Sicilografi bilimi tarihe hangi konuda yardımcı olur?",
+            options: ["Dilleri inceleyerek", "Mühürleri inceleyerek", "Armaları inceleyerek", "Kitabeleri inceleyerek", "Irkları inceleyerek"],
+            correct: 1,
+            level: "Orta",
+            explanation: "Sicilografi mühür bilimidir."
+        },
+        {
+            text: "Tarihsel bilginin üretim sürecinde dijitalleşmenin getirdiği en büyük risk aşağıdakilerden hangisidir?",
+            options: ["Bilgiye erişimin hızlanması", "Kaynakların korunması", "Bilgi kirliliği ve kaynağı belirsiz yanlış bilgilerin yayılması", "Farklı kütüphanelere uzaktan erişim", "Yapay zekanın veri analizi yapması"],
+            correct: 2,
+            level: "Orta",
+            explanation: "Dijitalleşme erişimi kolaylaştırsa da, doğruluğu teyit edilmemiş yanlış bilgilerin (bilgi kirliliği) yayılmasına neden olur."
+        },
+        {
+            text: "Bir tarihçi 'Fatih Sultan Mehmet döneminde İstanbul'daki toplumsal hayat' konusunu araştırırken aşağıdaki kaynak türlerinden hangisine ulaşması imkansızdır?",
+            options: ["O döneme ait minyatürler", "O dönemde yazılmış seyahatnameler", "O dönemin mahkeme kayıtları (Şer'iye sicilleri)", "Dönemin insanlarıyla yapılmış sesli röportajlar", "Döneme ait kıyafetler ve eşyalar"],
+            correct: 3,
+            level: "Orta",
+            explanation: "Fatih dönemi (15. yy) ile ilgili ses kaydı olamaz çünkü ses kayıt teknolojisi çok yenidir. Bu bir anakronizm tuzağıdır."
+        },
+
+        // ZOR SEVİYE
+        {
+            text: "Bir tarihçi araştırma yaparken, elindeki 15. yüzyıla ait bir vakfiyenin hem kağıt kalitesini hem de metnin içeriğindeki bilgilerin diğer belgelerle tutarlılığını inceliyorsa, metodolojinin hangi aşamalarını birlikte uyguluyor demektir?",
+            options: ["Tarama ve Tasnif", "Tasnif ve Terkip", "Dış Tenkit ve İç Tenkit", "Tahlil ve Terkip", "Tarama ve Tahlil"],
+            correct: 2,
+            level: "Zor",
+            explanation: "Araştırmacı hem kağıt kalitesine (eserin dış yapısı = Dış Tenkit) hem de bilgilerin tutarlılığına (içerik analizi = İç Tenkit) bakmaktadır."
+        },
+        {
+            text: "'Tarih, geçmişin kendisi değil; geçmişin tarihçi tarafından bugünün zihninde yeniden inşa edilmesidir.' görüşünü savunan birine göre tarihsel bilginin niteliği nasıldır?",
+            options: ["Tamamen objektif ve değişmezdir.", "Tarihçinin bakış açısından bağımsızdır.", "Geçmişin birebir kopyasıdır.", "Tarihçinin yorumu ve seçiciliği ile şekillenen bir kurgudur.", "Sadece yazılı belgelere dayanır."],
+            correct: 3,
+            level: "Zor",
+            explanation: "Bu görüşe göre tarih, geçmişin %100 aynısı değil, tarihçinin belgeler ışığında zihninde kurduğu bir 'inşa' sürecidir."
+        },
+        {
+            text: "Aşağıdaki durumlardan hangisi bir 'Anakronizm' örneğidir?",
+            options: ["Fatih Sultan Mehmet'in İstanbul'u fethinde şahi toplarını kullanması.", "Evliya Çelebi'nin Seyahatnamesi'nde 17. yüzyıl İstanbul'unu anlatması.", "Bir filmde Mete Han'ın ordusuna tüfekle ateş emri vermesi.", "Atatürk'ün Nutuk'ta Kurtuluş Savaşı'nı anlatması.", "Mısırlıların piramit inşa etmesi."],
+            correct: 2,
+            level: "Zor",
+            explanation: "Mete Han (M.Ö. dönem) zamanında 'tüfek' (ateşli silah) henüz icat edilmemiştir. Bu bir zaman hatasıdır (Anakronizm)."
+        },
+        {
+            text: "Tarihsel empati kuramayan bir araştırmacının aşağıdaki hatalardan hangisini yapması beklenir?",
+            options: ["Olayları kronolojik sıraya dizmek.", "Olayları günümüzün değer yargıları ve şartlarıyla yargılamak.", "Farklı kaynakları karşılaştırmak.", "Olayın geçtiği coğrafyayı incelemek.", "Neden-sonuç ilişkisine dikkat etmek."],
+            correct: 1,
+            level: "Zor",
+            explanation: "Empati kuramayan kişi, geçmişi 'bugünün' modern değerleriyle yargılar (Örn: 'Neden telefon etmediler?' demek gibi)."
+        },
+        {
+            text: "Bir tarih araştırmasında kaynakların 'Tasnif' (sınıflandırma) edilmesinin bilimsel yönteme en büyük katkısı nedir?",
+            options: ["Belgelerin orijinalliğini kanıtlamak.", "Araştırmacının konuya hakimiyetini artırıp, karmaşayı önleyerek zaman kazandırmak.", "Olayların doğruluğunu kesinleştirmek.", "Tarihi olayları edebi bir dille anlatmak.", "Tarihçinin yorum yapmasını engellemek."],
+            correct: 1,
+            level: "Zor",
+            explanation: "Bilimsel çalışmalarda metodun temel amacı, kaosu önlemek ve araştırmacının verimli çalışmasını sağlamaktır."
+        },
+        {
+            text: "M.Ö. 2000 yılı ile M.S. 2000 yılı arasındaki zaman farkı ne kadardır?",
+            options: ["0 yıl", "2000 yıl", "4000 yıl", "1000 yıl", "100 yıl"],
+            correct: 2,
+            level: "Zor",
+            explanation: "Milat (0) başlangıçtır. M.Ö. 2000'den 0'a kadar 2000 yıl, 0'dan M.S. 2000'e kadar 2000 yıl vardır. Toplam 4000 yıl."
+        },
+        {
+            text: "'Her tarihsel olay, kendi döneminin şartları (Zeitgeist/Zamanın Ruhu) içinde değerlendirilmelidir.' ilkesi, tarihçiyi hangi yaklaşımdan uzak tutar?",
+            options: ["Nedensellik", "Anakronizm", "Objektiflik", "Belgecilik", "Kronoloji"],
+            correct: 1,
+            level: "Zor",
+            explanation: "Olayı kendi zamanının şartlarında değerlendirmek, kişiyi 'tarih yanılgısı' (anakronizm) yapmaktan korur."
+        },
+        {
+            text: "Tarih biliminin diğer bilimlerden (örneğin Fen Bilimlerinden) ayrılan en temel yöntemsel farkı nedir?",
+            options: ["Gözlem yapabilmesi", "Evrensel yasalar koyabilmesi", "Tekrarlanabilir deneylere dayalı olmaması ve genelleme üretememesi", "İnsanla ilgilenmemesi", "Sadece bugünü incelemesi"],
+            correct: 2,
+            level: "Zor",
+            explanation: "Fen bilimleri deney yapar ve genel kanunlar koyar. Tarih ise insan faaliyetlerini inceler, deney yapamaz."
+        },
+        {
+            text: "Bir araştırmacı Orta Asya Türk kurganlarında (mezarlarında) bulduğu bir kılıcın hangi döneme ait olduğunu belirlemek için kılıcın üzerindeki motifleri sanat tarihi açısından, metalin yapısını kimya (Karbon-14) açısından, üzerindeki yazıları ise paleografya açısından incelemiştir. Bu durum neyi kanıtlar?",
+            options: ["Tarihin sadece siyasi olayları incelediğini.", "Tarihçinin her şeyi bilmek zorunda olduğunu.", "Tarih biliminin çok disiplinli bir çalışma yöntemi olduğunu.", "Tarihi bilgilerin güvenilmez olduğunu.", "Yazılı kaynakların her zaman en güvenilir kaynak olduğunu."],
+            correct: 2,
+            level: "Zor",
+            explanation: "Tarihçi tek başına her konuda uzman olamaz; kimya, sanat tarihi, filoloji gibi farklı alanlardan destek alarak gerçeğe ulaşır."
+        },
+        {
+            text: "'Tarih, tarihçi ile olgular arasında kesintisiz bir diyalog sürecidir.' (E.H. Carr) Bu söze göre tarihsel bilgi nasıl ortaya çıkar?",
+            options: ["Sadece geçmişte ne olduğunu bularak.", "Geçmişteki olayların (olguların) tarihçinin güncel yorumuyla harmanlanmasıyla.", "Tarihçinin olayları olduğu gibi aktarmasıyla.", "Tarihçinin hiç yorum katmamasıyla.", "Sadece belgelerin konuşturulmasıyla."],
+            correct: 1,
+            level: "Zor",
+            explanation: "E.H. Carr'ın bu sözü, tarihin sadece geçmişte duran bir 'obje' olmadığını, tarihçinin bugünkü bakış açısıyla geçmişi sürekli yeniden yorumladığını anlatır."
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let userAnswers = {}; // { 0: 1, 1: 3 ... } formatında cevapları tutar
+
+    const navPanel = document.getElementById('navPanel');
+    const qIndex = document.getElementById('qIndex');
+    const qDifficulty = document.getElementById('qDifficulty');
+    const qText = document.getElementById('qText');
+    const qOptions = document.getElementById('qOptions');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const finishBtn = document.getElementById('finishBtn');
+    const quizContainer = document.getElementById('quizContainer');
+    const resultContainer = document.getElementById('resultContainer');
+    const reviewArea = document.getElementById('reviewArea');
+    const scoreText = document.getElementById('scoreText');
+
+    function init() {
+        // Navigasyon butonlarını oluştur
+        questions.forEach((_, index) => {
+            const btn = document.createElement('div');
+            btn.className = 'nav-btn';
+            btn.innerText = index + 1;
+            btn.onclick = () => jumpToQuestion(index);
+            navPanel.appendChild(btn);
+        });
+        loadQuestion(0);
+    }
+
+    function jumpToQuestion(index) {
+        loadQuestion(index);
+    }
+
+    function loadQuestion(index) {
+        currentQuestionIndex = index;
+        
+        // Navigasyonu güncelle
+        document.querySelectorAll('.nav-btn').forEach((btn, idx) => {
+            btn.classList.remove('active');
+            if (idx === index) btn.classList.add('active');
+            if (userAnswers[idx] !== undefined) btn.classList.add('answered');
+        });
+
+        const q = questions[index];
+        qIndex.innerText = `Soru ${index + 1}/${questions.length}`;
+        qDifficulty.innerText = q.level;
+        qText.innerText = q.text;
+        
+        // Seçenekleri oluştur
+        qOptions.innerHTML = '';
+        q.options.forEach((opt, optIndex) => {
+            const label = document.createElement('label');
+            label.className = 'option-label';
+            
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'questionOption';
+            input.value = optIndex;
+            if (userAnswers[index] === optIndex) {
+                input.checked = true;
+            }
+            input.onchange = () => selectOption(optIndex);
+
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(opt));
+            qOptions.appendChild(label);
+        });
+
+        // Buton durumları
+        prevBtn.disabled = index === 0;
+        if (index === questions.length - 1) {
+            nextBtn.style.display = 'none';
+            finishBtn.style.display = 'inline-block';
+        } else {
+            nextBtn.style.display = 'inline-block';
+            finishBtn.style.display = 'none';
+        }
+    }
+
+    function selectOption(optIndex) {
+        userAnswers[currentQuestionIndex] = optIndex;
+        document.querySelectorAll('.nav-btn')[currentQuestionIndex].classList.add('answered');
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) loadQuestion(currentQuestionIndex - 1);
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < questions.length - 1) loadQuestion(currentQuestionIndex + 1);
+    }
+
+    function finishQuiz() {
+        if (!confirm('Testi bitirmek istediğinize emin misiniz?')) return;
+
+        let correctCount = 0;
+        let html = '';
+
+        questions.forEach((q, index) => {
+            const userAnswer = userAnswers[index];
+            const isCorrect = userAnswer === q.correct;
+            
+            if (isCorrect) correctCount++;
+
+            let answerStatus = '';
+            if (userAnswer === undefined) {
+                answerStatus = '<span style="color:orange">Boş Bırakıldı</span>';
+            } else if (isCorrect) {
+                answerStatus = '<span class="correct">Doğru</span>';
+            } else {
+                answerStatus = '<span class="incorrect">Yanlış</span>';
+            }
+
+            html += `
+                <div class="review-item">
+                    <div class="review-q">${index + 1}. ${q.text}</div>
+                    <div class="review-ans">Sizin Cevabınız: ${userAnswer !== undefined ? q.options[userAnswer] : '-'} (${answerStatus})</div>
+                    <div class="review-ans">Doğru Cevap: <span class="correct">${q.options[q.correct]}</span></div>
+                    <div class="explanation"><strong>Açıklama:</strong> ${q.explanation}</div>
+                </div>
+            `;
+        });
+
+        const score = (correctCount / questions.length) * 100;
+        scoreText.innerHTML = `Doğru: ${correctCount} | Yanlış/Boş: ${questions.length - correctCount}<br><strong>Puan: ${score}</strong>`;
+        reviewArea.innerHTML = html;
+
+        quizContainer.style.display = 'none';
+        navPanel.style.display = 'none';
+        resultContainer.style.display = 'block';
+        window.scrollTo(0, 0);
+    }
+
+    // Başlat
+    init();
+
+</script>
+
+</body>
+</html>
